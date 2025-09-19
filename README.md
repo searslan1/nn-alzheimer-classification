@@ -1,93 +1,118 @@
-🧠 Alzheimer MRI Classification with CNN
-📌 Proje Özeti
+# 🧠 Alzheimer CNN Classification Project
 
-Bu proje, Convolutional Neural Networks (CNN) kullanarak MRI beyin görüntülerinden Alzheimer hastalığının evrelerini sınıflandırmayı amaçlamaktadır.
-Erken teşhis için yapay zekâ tabanlı görüntü analizi, hastaların yaşam kalitesini artırma ve doktorlara yardımcı olma potansiyeline sahiptir.
+## 📌 Project Overview
 
-Sınıflar (labels):
+This project applies **Convolutional Neural Networks (CNNs)** using **PyTorch** to classify MRI brain images into different stages of **Alzheimer’s disease progression**. The aim is to develop a model that can support early detection and staging of Alzheimer’s using deep learning techniques.
 
-Non Demented (Sağlıklı)
+---
 
-Very Mild Demented (Çok Hafif Evre)
+## 🎯 Objectives
 
-Mild Demented (Hafif Evre)
+* Train a CNN model on MRI images from the Alzheimer dataset.
+* Perform multi-class classification into 4 categories:
 
-Moderate Demented (Orta Evre)
+  * **Non Demented**
+  * **Very Mild Demented**
+  * **Mild Demented**
+  * **Moderate Demented**
+* Implement data augmentation, dropout, and evaluation metrics to ensure robustness.
+* Visualize model performance with accuracy/loss curves, confusion matrix, and Grad-CAM heatmaps.
 
-📂 Veri Seti
+---
 
-Kaynak: Kaggle Alzheimer Dataset
+## 📂 Project Structure
 
-İçerik: MRI görüntüleri, train/test klasörleri
+```
+Alzheimer-CNN-Project/
+│
+├── data/                        # Dataset (raw & processed)
+├── notebooks/                   # Kaggle notebooks (EDA, training, transfer learning)
+├── src/                         # Source code modules
+│   ├── dataset.py               # Custom dataset & DataLoader
+│   ├── transforms.py            # Data augmentation & normalization
+│   ├── model.py                 # CNN architecture
+│   ├── train.py                 # Training loop
+│   ├── evaluate.py              # Evaluation functions
+│   ├── visualization.py         # Accuracy/Loss plots & Grad-CAM
+│   └── utils.py                 # Helper functions
+├── outputs/                     # Models, logs, figures
+├── docker/                      # Docker setup (Dockerfile, compose)
+├── requirements.txt             # Dependencies
+└── README.md                    # Project documentation
+```
 
-Önişleme:
+---
 
-Görseller 128x128 px boyutuna getirildi
+## ⚙️ Setup Instructions
 
-Normalizasyon (0–1 aralığı)
+### 1. Clone the Repository
 
-Data augmentation (rotation, zoom, flip)
+```bash
+git clone https://github.com/<username>/Alzheimer-CNN-Project.git
+cd Alzheimer-CNN-Project
+```
 
-⚙️ Model Mimarisi
+### 2. Install Dependencies
 
-Conv2D + ReLU (özellik çıkarma)
-
-MaxPooling2D (boyut küçültme)
-
-Dropout (overfitting önleme)
-
-Dense Layer (tam bağlı katmanlar)
-
-Softmax Output (olasılık dağılımı → sınıf tahmini)
-
-📌 Ayrıca transfer learning (ResNet, VGG16) ile ek deneyler yapılmıştır.
-
-🏋️‍♂️ Eğitim
-
-Framework: TensorFlow/Keras (Python)
-
-Loss: Categorical Crossentropy
-
-Optimizer: Adam
-
-Epochs: 20–30 (early stopping ile kontrol)
-
-Batch Size: 32
-
-📊 Sonuçlar
-
-Accuracy/Loss grafikleri (epoch bazlı)
-
-Confusion Matrix → hangi evrelerin karıştığı
-
-Classification Report (precision, recall, F1)
-
-Grad-CAM görselleştirme → MRI’da hangi bölgelerin karar için kullanıldığı
-
-(Ekran görüntüleri buraya eklenecek)
-
-🔬 Analiz
-
-Overfitting/underfitting durumları incelendi.
-
-Dropout ve augmentation ile genelleme artırıldı.
-
-Hiperparametre optimizasyonu (learning rate, batch size, dropout) test edildi.
-
-📎 Kullanım
-git clone https://github.com/<username>/alzheimer-cnn.git
-cd alzheimer-cnn
+```bash
 pip install -r requirements.txt
-python train.py
+```
 
-📑 Kaynaklar
+### 3. Run Training
 
-Kaggle Alzheimer Dataset
+```bash
+python src/train.py
+```
 
-Research Paper
+### 4. Run Evaluation
 
-📌 Bağlantılar
+```bash
+python src/evaluate.py
+```
 
-📓 Kaggle Notebook
+### 5. Run with Docker (optional)
 
-💻 GitHub Repo
+```bash
+docker build -t alzheimer-cnn .
+docker run -it -p 8888:8888 alzheimer-cnn
+```
+
+---
+
+## 📊 Results & Evaluation
+
+* **Metrics:** Accuracy, Loss, Precision, Recall, F1-score.
+* **Visualizations:**
+
+  * Accuracy & Loss curves (epoch-wise)
+  * Confusion matrix
+  * Classification report
+  * Grad-CAM heatmaps highlighting important brain regions
+
+---
+
+## 🚀 Extensions & Bonus
+
+* **Transfer Learning:** Experiments with pre-trained models (ResNet, EfficientNet).
+* **HPO:** Hyperparameter optimization (learning rate, batch size, dropout).
+* **Explainability:** Grad-CAM for medical interpretability.
+
+---
+
+## 📎 Dataset Reference
+
+* Kaggle: [Alzheimer MRI Dataset](https://www.kaggle.com/yasserhessein/dataset-alzheimer)
+* Related Paper: [Deep learning based prediction of Alzheimer’s disease from MRI](https://www.researchgate.net/publication/348486602_Deep_learning_based_prediction_of_Alzheimer's_disease_from_magnetic_resonance_images)
+
+---
+
+## 👤 Author
+
+* **Your Name**
+  Bootcamp Project – CNN Deep Learning (Alzheimer MRI Classification)
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License.
