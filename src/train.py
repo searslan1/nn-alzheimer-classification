@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
+from torch.optim.lr_scheduler import ReduceLROnPlateau   # 🔑 Scheduler eklendi
 
 from dataset import build_dataloaders
 from evaluate import evaluate_model, save_confusion_matrix, save_classification_report
@@ -12,6 +13,7 @@ from PIL import Image
 from torchvision import transforms
 from model import get_model
 
+
 def train_model(
     data_root="data/processed",
     epochs=50,
@@ -19,7 +21,7 @@ def train_model(
     lr=0.001,
     device=None,
     save_dir="outputs/models",
-    model_name="resnet"   # 🔑 parametre eklendi
+    model_name="resnet"
 ):
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Training on device: {device}")
@@ -34,31 +36,39 @@ def train_model(
     classes = meta["classes"]
     print(f"Classes: {classes}")
 
+    # Model
     model = get_model(
-    model_name=model_name,       # "cnn" veya "resnet"
-    num_classes=len(classes),
-    pretrained=True,
-    freeze_backbone=True
+        model_name=model_name,
+        num_classes=len(classes),
+        pretrained=True,
+        freeze_backbone=True
     ).to(device)
 
     # Grad-CAM için layer seçimi
     if model_name == "cnn":
         gradcam_layer = model.conv3
     elif model_name == "resnet":
-        gradcam_layer = model.backbone.layer4[-1]  # daha güvenli
+        gradcam_layer = model.backbone.layer4[-1]
 
-    # 🔑 Class weights
+    # Loss & optimizer
     class_weights = meta["class_weights"].to(device)
     criterion = nn.CrossEntropyLoss(weight=class_weights)
     optimizer = optim.Adam(model.parameters(), lr=lr)
-    # TensorBoard için log
+
+    # 🔑 Scheduler
+    scheduler = ReduceLROnPlateau(
+        optimizer,
+        mode="min", factor=0.1, patience=5, verbose=True
+    )
+
+    # TensorBoard
     writer = SummaryWriter(log_dir=f"outputs/logs/{model_name}")
 
-
-    # History dict
     history = {"train_loss": [], "val_loss": [], "train_acc": [], "val_acc": []}
 
-    # Eğitim döngüsü
+    # --------------------------
+    # Training loop
+    # --------------------------
     for epoch in range(epochs):
         model.train()
         running_loss, correct, total = 0.0, 0, 0
@@ -83,11 +93,13 @@ def train_model(
         # Validation
         val_acc, val_loss, _, _ = evaluate_model(model, val_loader, criterion, device)
 
-        # Log kayıt
+        # 🔑 Scheduler step (validation loss üzerinden)
+        scheduler.step(val_loss)
+
+        # Logging
         writer.add_scalars("Loss", {"Train": train_loss, "Val": val_loss}, epoch+1)
         writer.add_scalars("Accuracy", {"Train": train_acc, "Val": val_acc}, epoch+1)
 
-        # History
         history["train_loss"].append(train_loss)
         history["val_loss"].append(val_loss)
         history["train_acc"].append(train_acc)
@@ -95,21 +107,20 @@ def train_model(
 
         print(f"Epoch [{epoch+1}/{epochs}] "
               f"Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.2f}% "
-              f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.2f}%")
+              f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.2f}% "
+              f"(LR: {optimizer.param_groups[0]['lr']:.6f})")
 
-    # Model kaydet
+    # --------------------------
+    # Save model & results
+    # --------------------------
     os.makedirs(save_dir, exist_ok=True)
     model_path = os.path.join(save_dir, f"alzheimer_{model_name}.pt")
     torch.save(model.state_dict(), model_path)
     print(f"✅ Model kaydedildi: {model_path}")
 
-    # Eğitim grafikleri
     os.makedirs("outputs/figures", exist_ok=True)
     plot_training(history, save_path="outputs/figures/training_curves.png")
 
-    # -----------------------------
-    # Validation sonrası sonuçları kaydet
-    # -----------------------------
     print("Evaluating on validation set...")
     val_acc, val_loss, y_true, y_pred = evaluate_model(model, val_loader, criterion, device)
 
@@ -119,21 +130,18 @@ def train_model(
 
     print("✅ Evaluation results saved.")
 
-    # -----------------------------
     # Grad-CAM örneği
-    # -----------------------------
     print("Generating Grad-CAM example...")
-
     sample_img, sample_label = next(iter(val_loader))
     sample_img = sample_img[0].unsqueeze(0).to(device)
 
     heatmap, pred_class = generate_gradcam(
-    model,
-    sample_img,
-    conv_layer=gradcam_layer,
-    device=device
-)
-    # Normalizasyonu geri almak için inverse transform
+        model,
+        sample_img,
+        conv_layer=gradcam_layer,
+        device=device
+    )
+
     inv_transform = transforms.Compose([
         transforms.Normalize(
             mean=[-0.485/0.229, -0.456/0.224, -0.406/0.225],
@@ -148,7 +156,6 @@ def train_model(
         heatmap,
         save_path="outputs/figures/gradcam_example.png"
     )
-
     print("✅ Grad-CAM example saved.")
 
     return model, history, classes

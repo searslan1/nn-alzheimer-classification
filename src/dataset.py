@@ -4,7 +4,7 @@ from PIL import Image
 from transforms import train_transform, val_transform
 
 import torch
-from torch.utils.data import Dataset, DataLoader, Subset, WeightedRandomSampler
+from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
 from sklearn.model_selection import StratifiedShuffleSplit
 
 # -----------------------------
@@ -136,7 +136,8 @@ def build_dataloaders(
     val_transform=None,
     train_dir: str = "train",
     val_dir: str = "val",
-    test_dir: str = "test"
+    test_dir: str = "test",
+    use_sampler: bool = False   # 🔑 parametre eklendi
 ):
     train_path = os.path.join(data_root, train_dir)
     val_path = os.path.join(data_root, val_dir)
@@ -146,8 +147,27 @@ def build_dataloaders(
     val_set   = AlzheimerDataset(val_path, transform=val_transform)
     test_set  = AlzheimerDataset(test_path, transform=val_transform) if os.path.isdir(test_path) else None
 
-    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True,
-                              num_workers=num_workers, pin_memory=pin_memory)
+    # 🔑 Class weights ekle
+    class_weights = compute_class_weights(train_set.labels, len(train_set.classes))
+
+    # 🔑 WeightedRandomSampler veya shuffle
+    if use_sampler:
+        sample_weights = [class_weights[label].item() for label in train_set.labels]
+        sampler = WeightedRandomSampler(
+            weights=sample_weights,
+            num_samples=len(sample_weights),
+            replacement=True
+        )
+        train_loader = DataLoader(train_set, batch_size=batch_size,
+                                  sampler=sampler,
+                                  num_workers=num_workers,
+                                  pin_memory=pin_memory)
+    else:
+        train_loader = DataLoader(train_set, batch_size=batch_size,
+                                  shuffle=True,
+                                  num_workers=num_workers,
+                                  pin_memory=pin_memory)
+
     val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False,
                             num_workers=num_workers, pin_memory=pin_memory)
     test_loader = None
@@ -155,14 +175,9 @@ def build_dataloaders(
         test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False,
                                  num_workers=num_workers, pin_memory=pin_memory)
 
-    # 🔑 Class weights ekle
-    class_weights = compute_class_weights(train_set.labels, len(train_set.classes))
-
     meta = {
         "classes": train_set.classes,
         "num_classes": len(train_set.classes),
         "class_weights": class_weights
     }
     return train_loader, val_loader, test_loader, meta
-
-
