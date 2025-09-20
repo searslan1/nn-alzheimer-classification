@@ -6,9 +6,12 @@ from torch.utils.tensorboard import SummaryWriter
 
 from dataset import build_dataloaders
 from model import AlzheimerCNN
-from evaluate import evaluate_model
-from visualization import plot_training
+from evaluate import evaluate_model, save_confusion_matrix, save_classification_report
+from visualization import plot_training, generate_gradcam, plot_gradcam_on_image
 from transforms import train_transform, val_transform
+from PIL import Image
+from torchvision import transforms
+
 
 def train_model(
     data_root="data/processed",
@@ -66,7 +69,7 @@ def train_model(
         train_acc = 100. * correct / total
 
         # Validation
-        val_acc, val_loss = evaluate_model(model, val_loader, criterion, device)
+        val_acc, val_loss, _, _ = evaluate_model(model, val_loader, criterion, device)
 
         # Log kayıt
         writer.add_scalars("Loss", {"Train": train_loss, "Val": val_loss}, epoch+1)
@@ -91,6 +94,52 @@ def train_model(
     # Eğitim grafikleri
     os.makedirs("outputs/figures", exist_ok=True)
     plot_training(history, save_path="outputs/figures/training_curves.png")
+
+    # -----------------------------
+    # Validation sonrası sonuçları kaydet
+    # -----------------------------
+    print("Evaluating on validation set...")
+    val_acc, val_loss, y_true, y_pred = evaluate_model(model, val_loader, criterion, device)
+
+    os.makedirs("outputs/reports", exist_ok=True)
+    save_confusion_matrix(y_true, y_pred, classes, save_path="outputs/figures/confusion_matrix.png")
+    save_classification_report(y_true, y_pred, classes, save_path="outputs/reports/classification_report.txt")
+
+    print("✅ Evaluation results saved.")
+
+    # -----------------------------
+    # Grad-CAM örneği
+    # -----------------------------
+    print("Generating Grad-CAM example...")
+
+    sample_img, sample_label = next(iter(val_loader))
+    sample_img = sample_img[0].unsqueeze(0).to(device)
+
+    heatmap, pred_class = generate_gradcam(
+        model,
+        sample_img,
+        target_class=sample_label[0].item(),
+        conv_layer=model.conv3,
+        device=device
+    )
+
+    # Normalizasyonu geri almak için inverse transform
+    inv_transform = transforms.Compose([
+        transforms.Normalize(
+            mean=[-0.485/0.229, -0.456/0.224, -0.406/0.225],
+            std=[1/0.229, 1/0.224, 1/0.225]
+        ),
+        transforms.ToPILImage()
+    ])
+    original_img = inv_transform(sample_img.squeeze().cpu())
+
+    plot_gradcam_on_image(
+        original_img,
+        heatmap,
+        save_path="outputs/figures/gradcam_example.png"
+    )
+
+    print("✅ Grad-CAM example saved.")
 
     return model, history, classes
 
