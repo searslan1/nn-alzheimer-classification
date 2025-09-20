@@ -37,8 +37,6 @@ def train_model(
     train_loader, val_loader, test_loader, meta = build_dataloaders(
         data_root=data_root,
         batch_size=batch_size,
-        train_transform=train_transform,
-        val_transform=val_transform,
         class_transforms=class_transforms,
         use_sampler=use_sampler
     )
