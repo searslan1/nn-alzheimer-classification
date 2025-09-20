@@ -5,7 +5,6 @@ import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 
 from dataset import build_dataloaders
-from model import AlzheimerCNN
 from evaluate import evaluate_model, save_confusion_matrix, save_classification_report
 from visualization import plot_training, generate_gradcam, plot_gradcam_on_image
 from transforms import train_transform, val_transform
@@ -53,7 +52,8 @@ def train_model(
     criterion = nn.CrossEntropyLoss(weight=class_weights)
     optimizer = optim.Adam(model.parameters(), lr=lr)
     # TensorBoard için log
-    writer = SummaryWriter(log_dir="outputs/logs")
+    writer = SummaryWriter(log_dir=f"outputs/logs/{model_name}")
+
 
     # History dict
     history = {"train_loss": [], "val_loss": [], "train_acc": [], "val_acc": []}
@@ -99,7 +99,7 @@ def train_model(
 
     # Model kaydet
     os.makedirs(save_dir, exist_ok=True)
-    model_path = os.path.join(save_dir, "alzheimer_cnn.pt")
+    model_path = os.path.join(save_dir, f"alzheimer_{model_name}.pt")
     torch.save(model.state_dict(), model_path)
     print(f"✅ Model kaydedildi: {model_path}")
 
@@ -128,12 +128,11 @@ def train_model(
     sample_img = sample_img[0].unsqueeze(0).to(device)
 
     heatmap, pred_class = generate_gradcam(
-        model,
-        sample_img,
-        target_class=sample_label[0].item(),
-        conv_layer=gradcam_layer,   # 🔑 dinamik
-        device=device
-    )
+    model,
+    sample_img,
+    conv_layer=gradcam_layer,
+    device=device
+)
     # Normalizasyonu geri almak için inverse transform
     inv_transform = transforms.Compose([
         transforms.Normalize(

@@ -45,19 +45,17 @@ def plot_training(history, save_path="outputs/figures/training_curves.png"):
 # --------------------------
 # 2) Grad-CAM
 # --------------------------
-def generate_gradcam(model, image_tensor, target_class, conv_layer, device="cpu"):
+def generate_gradcam(model, image_tensor, conv_layer, device="cpu", target_class=None):
     """
     Tek bir görüntü için Grad-CAM heatmap üretir.
     - image_tensor: (1, C, H, W) boyutunda Tensor
-    - target_class: hedef sınıf id’si
-    - conv_layer: modeldeki conv layer referansı (örn. model.conv3)
+    - target_class: opsiyonel. Eğer None ise modelin tahmin ettiği sınıf için hesaplanır.
+    - conv_layer: modeldeki conv layer referansı (örn. model.conv3 veya model.backbone.layer4)
     """
     model.eval()
     image_tensor = image_tensor.to(device)
 
-    # Hook mekanizması
-    activations = []
-    gradients = []
+    activations, gradients = [], []
 
     def forward_hook(module, inp, out):
         activations.append(out.detach())
@@ -67,12 +65,16 @@ def generate_gradcam(model, image_tensor, target_class, conv_layer, device="cpu"
 
     # Hook’ları kaydet
     fwd_hook = conv_layer.register_forward_hook(forward_hook)
-    bwd_hook = conv_layer.register_backward_hook(backward_hook)
+    bwd_hook = conv_layer.register_full_backward_hook(backward_hook)
 
     # Forward + backward
     output = model(image_tensor)
     pred_class = output.argmax(dim=1).item()
-    loss = output[0, target_class]
+
+    # Eğer target_class belirtilmemişse tahmin edilen sınıfı kullan
+    target = pred_class if target_class is None else target_class
+    loss = output[0, target]
+
     model.zero_grad()
     loss.backward()
 
