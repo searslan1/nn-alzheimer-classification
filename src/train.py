@@ -20,7 +20,7 @@ def train_model(
     lr=0.001,
     device=None,
     save_dir="outputs/models",
-    model_name="resnet50"   # 🔑 parametre eklendi
+    model_name="resnet"   # 🔑 parametre eklendi
 ):
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Training on device: {device}")
