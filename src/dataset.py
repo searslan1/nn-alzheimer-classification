@@ -5,8 +5,9 @@ from PIL import Image
 import torch
 from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
 from sklearn.model_selection import StratifiedShuffleSplit
+from torchvision import transforms
 
-from transforms import  class_transforms
+from transforms import class_transforms
 
 # -----------------------------
 # 0) Yardımcılar / sabitler
@@ -84,6 +85,10 @@ class AlzheimerDataset(Dataset):
         elif self.transform is not None:
             img = self.transform(img)
 
+        # 🔑 Safety net: her durumda Tensor dönüşümünü garanti et
+        if not isinstance(img, torch.Tensor):
+            img = transforms.ToTensor()(img)
+
         if self.return_path:
             return img, label, path
         return img, label
@@ -113,7 +118,6 @@ def compute_class_weights(labels: List[int], num_classes: int) -> torch.Tensor:
     weights = weights / weights.sum()
 
     return weights
-
 
 
 # -----------------------------

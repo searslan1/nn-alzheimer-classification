@@ -13,13 +13,11 @@ base_train_transform = transforms.Compose([
 ])
 
 # Validation & Test transform
-# transforms.py içinde
 default_transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
     transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
 ])
-
 
 # Class-specific augmentations
 class_transforms = {
@@ -37,8 +35,8 @@ class_transforms = {
         transforms.RandomHorizontalFlip(p=0.7),
         transforms.RandomRotation(20),
         transforms.ColorJitter(saturation=0.2, hue=0.1),
-        transforms.RandomErasing(p=0.1),  # daha az agresif başla
         transforms.ToTensor(),
         transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
+        transforms.RandomErasing(p=0.1),  # normalize sonrası daha sağlıklı
     ])
 }
