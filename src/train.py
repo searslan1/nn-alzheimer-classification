@@ -11,7 +11,7 @@ from visualization import plot_training, generate_gradcam, plot_gradcam_on_image
 from transforms import train_transform, val_transform
 from PIL import Image
 from torchvision import transforms
-
+from model import AlzheimerCNN, get_resnet50
 
 def train_model(
     data_root="data/processed",
@@ -19,13 +19,13 @@ def train_model(
     batch_size=32,
     lr=0.001,
     device=None,
-    save_dir="outputs/models"
+    save_dir="outputs/models",
+    model_name="resnet50"   # 🔑 parametre eklendi
 ):
-    # Cihaz seçimi
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Training on device: {device}")
 
-    # DataLoader’ları hazırla
+    # DataLoader
     train_loader, val_loader, test_loader, meta = build_dataloaders(
         data_root=data_root,
         batch_size=batch_size,
@@ -35,11 +35,20 @@ def train_model(
     classes = meta["classes"]
     print(f"Classes: {classes}")
 
-    # Model & optimizer
-    model = AlzheimerCNN(num_classes=len(classes)).to(device)
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=lr)
+    # 🔑 Model seçimi
+    if model_name == "cnn":
+        model = AlzheimerCNN(num_classes=len(classes)).to(device)
+        gradcam_layer = model.conv3
+    elif model_name == "resnet50":
+        model = get_resnet50(num_classes=len(classes)).to(device)
+        gradcam_layer = model.layer4[2].conv3
+    else:
+        raise ValueError(f"Unknown model_name: {model_name}")
 
+    # 🔑 Class weights
+    class_weights = meta["class_weights"].to(device)
+    criterion = nn.CrossEntropyLoss(weight=class_weights)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
     # TensorBoard için log
     writer = SummaryWriter(log_dir="outputs/logs")
 
@@ -119,10 +128,9 @@ def train_model(
         model,
         sample_img,
         target_class=sample_label[0].item(),
-        conv_layer=model.conv3,
+        conv_layer=gradcam_layer,   # 🔑 dinamik
         device=device
     )
-
     # Normalizasyonu geri almak için inverse transform
     inv_transform = transforms.Compose([
         transforms.Normalize(

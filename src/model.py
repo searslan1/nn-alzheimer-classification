@@ -1,7 +1,11 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchvision import models
 
+# -----------------------------
+# 1) Basit CNN Modeli
+# -----------------------------
 class AlzheimerCNN(nn.Module):
     def __init__(self, num_classes: int = 4):
         super(AlzheimerCNN, self).__init__()
@@ -40,3 +44,41 @@ class AlzheimerCNN(nn.Module):
         x = self.drop1(x)
         x = self.fc2(x)
         return x
+
+
+# -----------------------------
+# 2) Transfer Learning: ResNet50
+# -----------------------------
+class AlzheimerResNet(nn.Module):
+    def __init__(self, num_classes: int = 4, pretrained: bool = True, freeze_backbone: bool = True):
+        super(AlzheimerResNet, self).__init__()
+
+        # Torchvision’dan ResNet50 yükle
+        self.backbone = models.resnet50(pretrained=pretrained)
+
+        # İsteğe bağlı: backbone dondur
+        if freeze_backbone:
+            for param in self.backbone.parameters():
+                param.requires_grad = False
+
+        # Son katmanı Alzheimer sınıfları için değiştir
+        in_features = self.backbone.fc.in_features
+        self.backbone.fc = nn.Linear(in_features, num_classes)
+
+    def forward(self, x):
+        return self.backbone(x)
+
+
+# -----------------------------
+# 3) Model seçici yardımcı fonksiyon
+# -----------------------------
+def get_model(model_name: str, num_classes: int = 4, pretrained: bool = True, freeze_backbone: bool = True):
+    """
+    model_name: 'cnn' veya 'resnet'
+    """
+    if model_name.lower() == "cnn":
+        return AlzheimerCNN(num_classes=num_classes)
+    elif model_name.lower() == "resnet":
+        return AlzheimerResNet(num_classes=num_classes, pretrained=pretrained, freeze_backbone=freeze_backbone)
+    else:
+        raise ValueError(f"Unknown model_name: {model_name}")

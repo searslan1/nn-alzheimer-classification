@@ -155,9 +155,14 @@ def build_dataloaders(
         test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False,
                                  num_workers=num_workers, pin_memory=pin_memory)
 
+    # 🔑 Class weights ekle
+    class_weights = compute_class_weights(train_set.labels, len(train_set.classes))
+
     meta = {
         "classes": train_set.classes,
-        "num_classes": len(train_set.classes)
+        "num_classes": len(train_set.classes),
+        "class_weights": class_weights
     }
     return train_loader, val_loader, test_loader, meta
+
 
