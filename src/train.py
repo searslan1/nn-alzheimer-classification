@@ -14,7 +14,7 @@ from model import get_model
 
 def train_model(
     data_root="data/processed",
-    epochs=20,
+    epochs=50,
     batch_size=32,
     lr=0.001,
     device=None,
