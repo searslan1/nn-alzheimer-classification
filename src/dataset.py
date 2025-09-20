@@ -1,11 +1,12 @@
 import os
-from typing import List, Tuple, Optional, Dict
+from typing import List, Tuple, Dict
 from PIL import Image
-from transforms import train_transform, val_transform
 
 import torch
 from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
 from sklearn.model_selection import StratifiedShuffleSplit
+
+from transforms import base_train_transform, val_transform, class_transforms
 
 # -----------------------------
 # 0) Yardımcılar / sabitler
@@ -46,18 +47,18 @@ class AlzheimerDataset(Dataset):
     Klasör yapısı:
       root_dir/
         NonDemented/
-          img1.jpg ...
         VeryMildDemented/
-          ...
         MildDemented/
         ModerateDemented/
     """
     def __init__(self,
                  root_dir: str,
                  transform=None,
+                 class_transforms: Dict[str, any] = None,
                  return_path: bool = False):
         self.root_dir = root_dir
         self.transform = transform
+        self.class_transforms = class_transforms or {}  # 🔑 sınıfa özel augmentations
         self.return_path = return_path
 
         self.classes = _list_classes(root_dir)
@@ -70,13 +71,17 @@ class AlzheimerDataset(Dataset):
     def __getitem__(self, idx: int):
         path = self.image_paths[idx]
         label = self.labels[idx]
+        cls_name = self.classes[label]
 
         try:
             img = Image.open(path).convert("RGB")
         except Exception as e:
             raise RuntimeError(f"Failed to load image: {path}\n{e}")
 
-        if self.transform is not None:
+        # 🔑 Öncelik: class-specific transform
+        if cls_name in self.class_transforms:
+            img = self.class_transforms[cls_name](img)
+        elif self.transform is not None:
             img = self.transform(img)
 
         if self.return_path:
@@ -102,7 +107,6 @@ def compute_class_weights(labels: List[int], num_classes: int) -> torch.Tensor:
     weights = []
     for c in range(num_classes):
         if counts[c] == 0:
-            # sınıf yoksa 0 bölmeye karşı koruma
             weights.append(0.0)
         else:
             weights.append(total / (num_classes * counts[c]))
@@ -115,9 +119,6 @@ def compute_class_weights(labels: List[int], num_classes: int) -> torch.Tensor:
 def stratified_split_indices(labels: List[int],
                              val_ratio: float = 0.2,
                              seed: int = 42):
-    """
-    labels üzerinden stratified split indeksleri döndürür.
-    """
     indices = list(range(len(labels)))
     sss = StratifiedShuffleSplit(n_splits=1, test_size=val_ratio, random_state=seed)
     train_idx, val_idx = next(sss.split(indices, labels))
@@ -134,20 +135,25 @@ def build_dataloaders(
     pin_memory: bool = True,
     train_transform=None,
     val_transform=None,
+    class_transforms=class_transforms,   # 🔑 default artık import edilen dict
     train_dir: str = "train",
     val_dir: str = "val",
     test_dir: str = "test",
-    use_sampler: bool = False   # 🔑 parametre eklendi
+    use_sampler: bool = False
 ):
     train_path = os.path.join(data_root, train_dir)
     val_path = os.path.join(data_root, val_dir)
     test_path = os.path.join(data_root, test_dir)
 
-    train_set = AlzheimerDataset(train_path, transform=train_transform)
+    train_set = AlzheimerDataset(
+        train_path,
+        transform=train_transform,
+        class_transforms=class_transforms   # 🔑 otomatik aktarılıyor
+    )
     val_set   = AlzheimerDataset(val_path, transform=val_transform)
     test_set  = AlzheimerDataset(test_path, transform=val_transform) if os.path.isdir(test_path) else None
 
-    # 🔑 Class weights ekle
+    # 🔑 Class weights
     class_weights = compute_class_weights(train_set.labels, len(train_set.classes))
 
     # 🔑 WeightedRandomSampler veya shuffle
@@ -170,6 +176,7 @@ def build_dataloaders(
 
     val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False,
                             num_workers=num_workers, pin_memory=pin_memory)
+
     test_loader = None
     if test_set is not None:
         test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False,
@@ -178,6 +185,7 @@ def build_dataloaders(
     meta = {
         "classes": train_set.classes,
         "num_classes": len(train_set.classes),
-        "class_weights": class_weights
+        "class_weights": class_weights,
+        "class_distribution": compute_class_distribution(train_set.labels, len(train_set.classes))
     }
     return train_loader, val_loader, test_loader, meta

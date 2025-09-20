@@ -1,15 +1,15 @@
 import os
+import time
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
-from torch.optim.lr_scheduler import ReduceLROnPlateau   # 🔑 Scheduler eklendi
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from dataset import build_dataloaders
 from evaluate import evaluate_model, save_confusion_matrix, save_classification_report
 from visualization import plot_training, generate_gradcam, plot_gradcam_on_image
-from transforms import train_transform, val_transform
-from PIL import Image
+from transforms import train_transform, val_transform, class_transforms
 from torchvision import transforms
 from model import get_model
 
@@ -21,22 +21,31 @@ def train_model(
     lr=0.001,
     device=None,
     save_dir="outputs/models",
-    model_name="resnet"
+    model_name="resnet",
+    use_sampler=True,
+    early_stopping_patience=10  # 🔑 opsiyonel early stopping
 ):
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Training on device: {device}")
 
+    # --------------------------
     # DataLoader
+    # --------------------------
     train_loader, val_loader, test_loader, meta = build_dataloaders(
         data_root=data_root,
         batch_size=batch_size,
         train_transform=train_transform,
-        val_transform=val_transform
+        val_transform=val_transform,
+        class_transforms=class_transforms,   # 🔑 sınıfa özel augmentations
+        use_sampler=use_sampler
     )
     classes = meta["classes"]
     print(f"Classes: {classes}")
+    print(f"Class distribution: {meta['class_distribution']}")
 
+    # --------------------------
     # Model
+    # --------------------------
     model = get_model(
         model_name=model_name,
         num_classes=len(classes),
@@ -50,21 +59,28 @@ def train_model(
     elif model_name == "resnet":
         gradcam_layer = model.backbone.layer4[-1]
 
-    # Loss & optimizer
+    # --------------------------
+    # Loss, optimizer, scheduler
+    # --------------------------
     class_weights = meta["class_weights"].to(device)
     criterion = nn.CrossEntropyLoss(weight=class_weights)
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
-    # 🔑 Scheduler
     scheduler = ReduceLROnPlateau(
-        optimizer,
-        mode="min", factor=0.1, patience=5, verbose=True
+        optimizer, mode="min", factor=0.1, patience=5, verbose=True
     )
 
+    # --------------------------
     # TensorBoard
-    writer = SummaryWriter(log_dir=f"outputs/logs/{model_name}")
+    # --------------------------
+    run_id = time.strftime("%Y%m%d-%H%M%S")
+    writer = SummaryWriter(log_dir=f"outputs/logs/{model_name}_{run_id}")
 
     history = {"train_loss": [], "val_loss": [], "train_acc": [], "val_acc": []}
+
+    # Early stopping için takip değişkenleri
+    best_val_loss = float("inf")
+    patience_counter = 0
 
     # --------------------------
     # Training loop
@@ -93,7 +109,7 @@ def train_model(
         # Validation
         val_acc, val_loss, _, _ = evaluate_model(model, val_loader, criterion, device)
 
-        # 🔑 Scheduler step (validation loss üzerinden)
+        # 🔑 Scheduler step
         scheduler.step(val_loss)
 
         # Logging
@@ -109,6 +125,16 @@ def train_model(
               f"Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.2f}% "
               f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.2f}% "
               f"(LR: {optimizer.param_groups[0]['lr']:.6f})")
+
+        # 🔑 Early stopping
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            patience_counter = 0
+        else:
+            patience_counter += 1
+            if patience_counter >= early_stopping_patience:
+                print("⏹ Early stopping triggered.")
+                break
 
     # --------------------------
     # Save model & results
@@ -130,7 +156,9 @@ def train_model(
 
     print("✅ Evaluation results saved.")
 
+    # --------------------------
     # Grad-CAM örneği
+    # --------------------------
     print("Generating Grad-CAM example...")
     sample_img, sample_label = next(iter(val_loader))
     sample_img = sample_img[0].unsqueeze(0).to(device)
