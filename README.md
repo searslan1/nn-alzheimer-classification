@@ -2,7 +2,7 @@
 
 ## 📌 Project Overview
 
-This project applies **Convolutional Neural Networks (CNNs)** using **PyTorch** to classify MRI brain images into different stages of **Alzheimer’s disease progression**. The aim is to develop a model that can support early detection and staging of Alzheimer’s using deep learning techniques.
+This project applies **Convolutional Neural Networks (CNNs)** using **PyTorch** to classify MRI brain images into different stages of **Alzheimer’s disease progression**. The aim is to develop a model that can support early detection and staging of Alzheimer’s using deep learning techniques, while also demonstrating explainability with **Grad-CAM**.
 
 ---
 
@@ -15,8 +15,28 @@ This project applies **Convolutional Neural Networks (CNNs)** using **PyTorch** 
   * **Very Mild Demented**
   * **Mild Demented**
   * **Moderate Demented**
-* Implement data augmentation, dropout, and evaluation metrics to ensure robustness.
-* Visualize model performance with accuracy/loss curves, confusion matrix, and Grad-CAM heatmaps.
+* Implement preprocessing, augmentation, dropout, and evaluation metrics to ensure robustness.
+* Visualize model performance with:
+
+  * Accuracy/Loss curves
+  * Confusion matrix & classification report
+  * Grad-CAM heatmaps for interpretability
+
+---
+
+## 🛠️ Framing
+
+* **Input:** MRI Brain Image → resized, normalized, augmented.
+* **Layers:**
+
+  * Convolution + ReLU (feature extraction)
+  * MaxPooling (dimensionality reduction)
+  * Dropout (regularization)
+  * Flatten (vectorization)
+  * Dense Layer (fully connected)
+  * Output Layer (Softmax)
+* **Output:** Probability distribution across 4 Alzheimer stages.
+* **Interpretation:** Predicts disease stage + highlights brain regions influencing the decision (Grad-CAM).
 
 ---
 
@@ -87,29 +107,39 @@ docker run -it -p 8888:8888 alzheimer-cnn
   * Accuracy & Loss curves (epoch-wise)
   * Confusion matrix
   * Classification report
-  * Grad-CAM heatmaps highlighting important brain regions
+  * Grad-CAM heatmaps highlighting brain regions
+
+---
+
+## 🔎 CNN Pipeline Diagram
+![alt text](<Alzheimer classification diagram.drawio.png>)
+
+---
+
+## 🔎 Grad-CAM Pipeline Diagram
+![alt text](<Grad-CAM Pipeline.drawio.png>)
 
 ---
 
 ## 🚀 Extensions & Bonus
 
-* **Transfer Learning:** Experiments with pre-trained models (ResNet, EfficientNet).
-* **HPO:** Hyperparameter optimization (learning rate, batch size, dropout).
-* **Explainability:** Grad-CAM for medical interpretability.
+* **Transfer Learning:** Use pre-trained models (ResNet, EfficientNet).
+* **Hyperparameter Optimization:** Tune learning rate, batch size, dropout.
+* **Explainability:** Grad-CAM ensures model interpretability in medical context.
 
 ---
 
 ## 📎 Dataset Reference
 
 * Kaggle: [Alzheimer MRI Dataset](https://www.kaggle.com/yasserhessein/dataset-alzheimer)
-* Related Paper: [Deep learning based prediction of Alzheimer’s disease from MRI](https://www.researchgate.net/publication/348486602_Deep_learning_based_prediction_of_Alzheimer's_disease_from_magnetic_resonance_images)
+* Paper: [Deep learning based prediction of Alzheimer’s disease from MRI](https://www.researchgate.net/publication/348486602_Deep_learning_based_prediction_of_Alzheimer's_disease_from_magnetic_resonance_images)
 
 ---
 
 ## 👤 Author
 
 * **Your Name**
-  Bootcamp Project – CNN Deep Learning (Alzheimer MRI Classification)
+  Akbank Bootcamp Project – CNN Deep Learning (Alzheimer MRI Classification)
 
 ---
 
