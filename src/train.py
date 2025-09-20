@@ -45,7 +45,7 @@ def train_model(
     if model_name == "cnn":
         gradcam_layer = model.conv3
     elif model_name == "resnet":
-        gradcam_layer = model.backbone.layer4[2].conv3
+        gradcam_layer = model.backbone.layer4[-1]  # daha güvenli
 
     # 🔑 Class weights
     class_weights = meta["class_weights"].to(device)

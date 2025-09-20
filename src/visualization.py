@@ -45,13 +45,7 @@ def plot_training(history, save_path="outputs/figures/training_curves.png"):
 # --------------------------
 # 2) Grad-CAM
 # --------------------------
-def generate_gradcam(model, image_tensor, conv_layer, device="cpu", target_class=None):
-    """
-    Tek bir görüntü için Grad-CAM heatmap üretir.
-    - image_tensor: (1, C, H, W) boyutunda Tensor
-    - target_class: opsiyonel. Eğer None ise modelin tahmin ettiği sınıf için hesaplanır.
-    - conv_layer: modeldeki conv layer referansı (örn. model.conv3 veya model.backbone.layer4)
-    """
+def generate_gradcam(model, image_tensor, target_class=None, conv_layer=None, device="cpu"):
     model.eval()
     image_tensor = image_tensor.to(device)
 
@@ -63,32 +57,34 @@ def generate_gradcam(model, image_tensor, conv_layer, device="cpu", target_class
     def backward_hook(module, grad_in, grad_out):
         gradients.append(grad_out[0].detach())
 
-    # Hook’ları kaydet
+    # Hook kayıt
     fwd_hook = conv_layer.register_forward_hook(forward_hook)
-    bwd_hook = conv_layer.register_full_backward_hook(backward_hook)
+    bwd_hook = conv_layer.register_full_backward_hook(backward_hook)  # ✅
 
     # Forward + backward
     output = model(image_tensor)
     pred_class = output.argmax(dim=1).item()
 
-    # Eğer target_class belirtilmemişse tahmin edilen sınıfı kullan
-    target = pred_class if target_class is None else target_class
-    loss = output[0, target]
+    if target_class is None:
+        target_class = pred_class
 
+    loss = output[0, target_class]
     model.zero_grad()
     loss.backward()
 
-    # Aktivasyon ve gradientleri al
-    act = activations[0]      # (batch, channels, H, W)
-    grad = gradients[0]       # (batch, channels, H, W)
+    if not activations or not gradients:
+        fwd_hook.remove()
+        bwd_hook.remove()
+        return np.zeros((image_tensor.shape[2], image_tensor.shape[3])), pred_class
 
-    weights = grad.mean(dim=(2, 3), keepdim=True)  # (batch, channels, 1, 1)
-    cam = (weights * act).sum(dim=1, keepdim=True)  # (batch, 1, H, W)
-    cam = F.relu(cam)
-    cam = cam.squeeze().cpu().numpy()
-    cam = (cam - cam.min()) / (cam.max() - cam.min() + 1e-8)  # normalize [0,1]
+    act = activations[0]
+    grad = gradients[0]
 
-    # Hook’ları temizle
+    weights = grad.mean(dim=(2, 3), keepdim=True)
+    cam = (weights * act).sum(dim=1, keepdim=True)
+    cam = F.relu(cam).squeeze().cpu().numpy()
+    cam = (cam - cam.min()) / (cam.max() - cam.min() + 1e-8)
+
     fwd_hook.remove()
     bwd_hook.remove()
 
