@@ -45,7 +45,7 @@ def train_model(
     # Grad-CAM için layer seçimi
     if model_name == "cnn":
         gradcam_layer = model.conv3
-    elif model_name == "resnet50":
+    elif model_name == "resnet":
         gradcam_layer = model.backbone.layer4[2].conv3
 
     # 🔑 Class weights
