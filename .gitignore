@@ -1,0 +1,27 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+
+# Logs & outputs
+logs/
+outputs/
+*.log
+*.csv
+*.json
+*.pth
+*.pt
+
+# Kaggle datasets
+data/raw/
+data/processed/
