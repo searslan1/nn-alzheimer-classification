@@ -99,9 +99,6 @@ def compute_class_distribution(labels: List[int], num_classes: int) -> List[int]
     return counts
 
 def compute_class_weights(labels: List[int], num_classes: int) -> torch.Tensor:
-    """
-    weight_c = total_samples / (num_classes * count_c)
-    """
     counts = compute_class_distribution(labels, num_classes)
     total = len(labels)
     weights = []
@@ -110,7 +107,13 @@ def compute_class_weights(labels: List[int], num_classes: int) -> torch.Tensor:
             weights.append(0.0)
         else:
             weights.append(total / (num_classes * counts[c]))
-    return torch.tensor(weights, dtype=torch.float32)
+    weights = torch.tensor(weights, dtype=torch.float32)
+
+    # 🔑 Normalize et
+    weights = weights / weights.sum()
+
+    return weights
+
 
 
 # -----------------------------

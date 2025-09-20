@@ -12,6 +12,7 @@ from visualization import plot_training, generate_gradcam, plot_gradcam_on_image
 from transforms import train_transform, val_transform, class_transforms
 from torchvision import transforms
 from model import get_model
+from losses import FocalLoss   # 🔑 eklendi
 
 
 def train_model(
@@ -23,7 +24,9 @@ def train_model(
     save_dir="outputs/models",
     model_name="resnet",
     use_sampler=True,
-    early_stopping_patience=10  # 🔑 opsiyonel early stopping
+    use_focal=True,                # 🔑 focal loss entegrasyonu
+    gamma=2.0,                     # 🔑 focal loss parametresi
+    early_stopping_patience=10
 ):
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Training on device: {device}")
@@ -36,7 +39,7 @@ def train_model(
         batch_size=batch_size,
         train_transform=train_transform,
         val_transform=val_transform,
-        class_transforms=class_transforms,   # 🔑 sınıfa özel augmentations
+        class_transforms=class_transforms,
         use_sampler=use_sampler
     )
     classes = meta["classes"]
@@ -63,7 +66,14 @@ def train_model(
     # Loss, optimizer, scheduler
     # --------------------------
     class_weights = meta["class_weights"].to(device)
-    criterion = nn.CrossEntropyLoss(weight=class_weights)
+
+    if use_focal:
+        criterion = FocalLoss(alpha=class_weights, gamma=gamma)
+        print("🔑 Using Focal Loss")
+    else:
+        criterion = nn.CrossEntropyLoss(weight=class_weights)
+        print("🔑 Using CrossEntropyLoss")
+
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
     scheduler = ReduceLROnPlateau(
@@ -78,7 +88,6 @@ def train_model(
 
     history = {"train_loss": [], "val_loss": [], "train_acc": [], "val_acc": []}
 
-    # Early stopping için takip değişkenleri
     best_val_loss = float("inf")
     patience_counter = 0
 
@@ -109,7 +118,7 @@ def train_model(
         # Validation
         val_acc, val_loss, _, _ = evaluate_model(model, val_loader, criterion, device)
 
-        # 🔑 Scheduler step
+        # Scheduler step
         scheduler.step(val_loss)
 
         # Logging
@@ -126,7 +135,7 @@ def train_model(
               f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.2f}% "
               f"(LR: {optimizer.param_groups[0]['lr']:.6f})")
 
-        # 🔑 Early stopping
+        # Early stopping
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             patience_counter = 0
