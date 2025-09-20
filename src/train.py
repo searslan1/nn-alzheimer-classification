@@ -11,7 +11,7 @@ from visualization import plot_training, generate_gradcam, plot_gradcam_on_image
 from transforms import train_transform, val_transform
 from PIL import Image
 from torchvision import transforms
-from model import AlzheimerCNN, get_resnet50
+from model import get_model
 
 def train_model(
     data_root="data/processed",
@@ -35,15 +35,18 @@ def train_model(
     classes = meta["classes"]
     print(f"Classes: {classes}")
 
-    # 🔑 Model seçimi
+    model = get_model(
+    model_name=model_name,       # "cnn" veya "resnet"
+    num_classes=len(classes),
+    pretrained=True,
+    freeze_backbone=True
+    ).to(device)
+
+    # Grad-CAM için layer seçimi
     if model_name == "cnn":
-        model = AlzheimerCNN(num_classes=len(classes)).to(device)
         gradcam_layer = model.conv3
     elif model_name == "resnet50":
-        model = get_resnet50(num_classes=len(classes)).to(device)
-        gradcam_layer = model.layer4[2].conv3
-    else:
-        raise ValueError(f"Unknown model_name: {model_name}")
+        gradcam_layer = model.backbone.layer4[2].conv3
 
     # 🔑 Class weights
     class_weights = meta["class_weights"].to(device)
