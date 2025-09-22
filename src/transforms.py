@@ -34,9 +34,9 @@ class_transforms = {
         transforms.Resize((224, 224)),
         transforms.RandomHorizontalFlip(p=0.7),
         transforms.RandomRotation(20),
-        transforms.ColorJitter(saturation=0.2, hue=0.1),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1), # 🔑 Değiştirildi
         transforms.ToTensor(),
         transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
-        transforms.RandomErasing(p=0.1),  # normalize sonrası daha sağlıklı
+        transforms.RandomErasing(p=0.3), # 🔑 P değeri artırıldı
     ])
 }
