@@ -35,7 +35,7 @@ def prepare_data():
                 shutil.copy(os.path.join(src_cls_dir, fname), os.path.join(dst_cls_dir, fname))
 
     # test setini doğrudan kopyala
-    raw_test = "data/raw/test"
+    raw_test = "../data/raw/test"
     if os.path.exists(raw_test):
         for cls in os.listdir(raw_test):
             src_cls_dir = os.path.join(raw_test, cls)
