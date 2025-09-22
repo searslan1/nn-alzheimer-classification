@@ -23,8 +23,8 @@ def train_model(
     device=None,
     save_dir="../outputs/models",
     model_name="resnet",
-    use_sampler=False,
-    use_focal=True,                # 🔑 focal loss entegrasyonu
+    use_sampler=True,
+    use_focal=False,                # 🔑 focal loss entegrasyonu
     gamma=2.0,                     # 🔑 focal loss parametresi
     early_stopping_patience=10
 ):
@@ -53,7 +53,7 @@ def train_model(
         model_name=model_name,
         num_classes=len(classes),
         pretrained=True,
-        freeze_backbone=True
+        freeze_backbone=False
     ).to(device)
 
     # Grad-CAM için layer seçimi
@@ -74,7 +74,7 @@ def train_model(
         criterion = nn.CrossEntropyLoss(weight=class_weights)
         print("🔑 Using CrossEntropyLoss")
 
-    optimizer = optim.Adam(model.parameters(), lr=lr)
+    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
 
     scheduler = ReduceLROnPlateau(
         optimizer, mode="min", factor=0.1, patience=5, verbose=True
@@ -199,4 +199,4 @@ def train_model(
 
 
 if __name__ == "__main__":
-    train_model(use_focal=True, use_sampler=False)
+    train_model(use_focal=False, use_sampler=True, lr=1e-4)
