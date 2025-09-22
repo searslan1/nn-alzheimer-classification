@@ -115,7 +115,7 @@ def compute_class_weights(labels: List[int], num_classes: int) -> torch.Tensor:
     weights = torch.tensor(weights, dtype=torch.float32)
 
     # 🔑 Normalize et
-    weights = weights / weights.sum()
+    #weights = weights / weights.sum()
 
     return weights
 

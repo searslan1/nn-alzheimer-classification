@@ -126,7 +126,7 @@ docker run -it -p 8888:8888 alzheimer-cnn
 * **Transfer Learning:** Use pre-trained models (ResNet, EfficientNet).
 * **Hyperparameter Optimization:** Tune learning rate, batch size, dropout.
 * **Explainability:** Grad-CAM ensures model interpretability in medical context.
-
+![alt text](image.png)
 ---
 
 ## 📎 Dataset Reference

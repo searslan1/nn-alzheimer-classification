@@ -24,7 +24,7 @@ def train_model(
     save_dir="outputs/models",
     model_name="resnet",
     use_sampler=True,
-    use_focal=True,                # 🔑 focal loss entegrasyonu
+    use_focal=False,                # 🔑 focal loss entegrasyonu
     gamma=2.0,                     # 🔑 focal loss parametresi
     early_stopping_patience=10
 ):
@@ -199,4 +199,4 @@ def train_model(
 
 
 if __name__ == "__main__":
-    train_model()
+    train_model(use_focal=False) 
