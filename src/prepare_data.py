@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 
 # Ayarlar
 RAW_DIR = "../data/raw/train"
-PROC_DIR = "data/processed"
+PROC_DIR = "../data/processed"
 VAL_RATIO = 0.2
 SEED = 42
 
