@@ -16,12 +16,12 @@ from losses import FocalLoss   # 🔑 eklendi
 
 
 def train_model(
-    data_root="data/processed",
+    data_root="../data/processed",
     epochs=50,
     batch_size=32,
     lr=0.001,
     device=None,
-    save_dir="outputs/models",
+    save_dir="../outputs/models",
     model_name="resnet",
     use_sampler=True,
     use_focal=False,                # 🔑 focal loss entegrasyonu
@@ -84,7 +84,7 @@ def train_model(
     # TensorBoard
     # --------------------------
     run_id = time.strftime("%Y%m%d-%H%M%S")
-    writer = SummaryWriter(log_dir=f"outputs/logs/{model_name}_{run_id}")
+    writer = SummaryWriter(log_dir=f"../outputs/logs/{model_name}_{run_id}")
 
     history = {"train_loss": [], "val_loss": [], "train_acc": [], "val_acc": []}
 
@@ -153,15 +153,15 @@ def train_model(
     torch.save(model.state_dict(), model_path)
     print(f"✅ Model kaydedildi: {model_path}")
 
-    os.makedirs("outputs/figures", exist_ok=True)
-    plot_training(history, save_path="outputs/figures/training_curves.png")
+    os.makedirs("../outputs/figures", exist_ok=True)
+    plot_training(history, save_path="../outputs/figures/training_curves.png")
 
     print("Evaluating on validation set...")
     val_acc, val_loss, y_true, y_pred = evaluate_model(model, val_loader, criterion, device)
 
-    os.makedirs("outputs/reports", exist_ok=True)
-    save_confusion_matrix(y_true, y_pred, classes, save_path="outputs/figures/confusion_matrix.png")
-    save_classification_report(y_true, y_pred, classes, save_path="outputs/reports/classification_report.txt")
+    os.makedirs("../outputs/reports", exist_ok=True)
+    save_confusion_matrix(y_true, y_pred, classes, save_path="../outputs/figures/confusion_matrix.png")
+    save_classification_report(y_true, y_pred, classes, save_path="../outputs/reports/classification_report.txt")
 
     print("✅ Evaluation results saved.")
 
@@ -191,7 +191,7 @@ def train_model(
     plot_gradcam_on_image(
         original_img,
         heatmap,
-        save_path="outputs/figures/gradcam_example.png"
+        save_path="../outputs/figures/gradcam_example.png"
     )
     print("✅ Grad-CAM example saved.")
 
