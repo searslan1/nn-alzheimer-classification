@@ -1,46 +1,64 @@
-# 🧠 Alzheimer CNN Classification Project
+# Alzheimer CNN Sınıflandırma Projesi
 
-## 📌 Project Overview
+## Giriş
+Bu proje, derin öğrenme yöntemlerini kullanarak **MRI beyin görüntülerini dört farklı Alzheimer hastalığı evresine sınıflandırmayı** amaçlamaktadır. Proje boyunca, **sınıf dengesizliği** ve **aşırı öğrenme (overfitting)** gibi zorlu problemlerle başa çıkılmış, modelin güvenilir ve klinik açıdan yorumlanabilir sonuçlar vermesi sağlanmıştır.  
 
-This project applies **Convolutional Neural Networks (CNNs)** using **PyTorch** to classify MRI brain images into different stages of **Alzheimer’s disease progression**. The aim is to develop a model that can support early detection and staging of Alzheimer’s using deep learning techniques, while also demonstrating explainability with **Grad-CAM**.
-
----
-
-## 🎯 Objectives
-
-* Train a CNN model on MRI images from the Alzheimer dataset.
-* Perform multi-class classification into 4 categories:
-
-  * **Non Demented**
-  * **Very Mild Demented**
-  * **Mild Demented**
-  * **Moderate Demented**
-* Implement preprocessing, augmentation, dropout, and evaluation metrics to ensure robustness.
-* Visualize model performance with:
-
-  * Accuracy/Loss curves
-  * Confusion matrix & classification report
-  * Grad-CAM heatmaps for interpretability
+Projenin teknik detayları, her aşamayı anlatan **notebook dosyaları** ve bu **README** dosyası aracılığıyla paylaşılmıştır. Çalışma sonucunda elde edilen metrikler ve yorumlamalar, sadece bir kod yazmanın ötesinde, bu kodu anlamanın ve yorumlamanın önemini vurgulamaktadır.  
 
 ---
 
-## 🛠️ Framing
+## Metrikler
+Yaptığımız çalışmalar sonucunda, modelimiz tüm sınıflar için neredeyse mükemmel bir performans sergilemiştir. Sadece kod yazmakla kalmayıp, elde ettiğimiz sonuçları yorumlayarak hangi yöntemin ne kadar etkili olduğunu anlamış olduk.
 
-* **Input:** MRI Brain Image → resized, normalized, augmented.
-* **Layers:**
+- **Final Doğruluk:** %97.47  
 
-  * Convolution + ReLU (feature extraction)
-  * MaxPooling (dimensionality reduction)
-  * Dropout (regularization)
-  * Flatten (vectorization)
-  * Dense Layer (fully connected)
-  * Output Layer (Softmax)
-* **Output:** Probability distribution across 4 Alzheimer stages.
-* **Interpretation:** Predicts disease stage + highlights brain regions influencing the decision (Grad-CAM).
+### Sınıf Bazlı F1-Skorları
+- MildDemented: %98  
+- ModerateDemented: %100 🏆  
+- NonDemented: %97  
+- VeryMildDemented: %97  
 
 ---
+### Çıktılar
 
-## 📂 Project Structure
+## Karmaşıklık Matrisi (Confusion Matrix)
+Modelin, zorlu **ModerateDemented** ve **VeryMildDemented** sınıflarını dahi mükemmele yakın bir doğrulukla ayırt edebildiği gözlemlenmiştir.  
+![alt text](confusion_matrix.png)
+---
+
+## Grad-CAM (Yorumlanabilirlik)
+Modelin karar verme sürecini görselleştiren **Grad-CAM ısı haritaları**, modelin beynin genel dokusuna ve Alzheimer ile ilişkilendirilen kritik bölgelere odaklandığını göstermektedir. Bu, modelin aldığı kararların **klinik olarak anlamlı** olduğunu doğrulamaktadır.  
+![alt text](gradcam_example.png)
+---
+## Eğitim Eğrileri (Training & Validation Curves)
+![alt text](<training_curves (5).png>)
+---
+#### Classification Report
+
+| Class              | Precision | Recall | F1-Score | Support |
+|---------------------|-----------|--------|----------|---------|
+| MildDemented        | 0.97      | 1.00   | 0.98     | 144     |
+| ModerateDemented    | 1.00      | 1.00   | 1.00     | 11      |
+| NonDemented         | 0.98      | 0.97   | 0.97     | 512     |
+| VeryMildDemented    | 0.97      | 0.97   | 0.97     | 359     |
+| **Accuracy**        |           |        | **0.97** | 1026    |
+| **Macro Avg**       | 0.98      | 0.98   | 0.98     | 1026    |
+| **Weighted Avg**    | 0.97      | 0.97   | 0.97     | 1026    |
+
+## Ekler
+Bu proje, veri hazırlığı ve modelin **aşırı öğrenmesini engellemek** gibi en kritik adımları başarıyla tamamlamıştır. Proje kapsamında kullanılan ana bileşenlerin görselleştirilmesi aşağıda yer almaktadır.
+
+- **Proje Mimarisi**  :
+![alt text](<High-Level Architecture.drawio.png>)
+- **CNN Akış Diyagramı**  :
+![alt text](<Alzheimer classification diagram.drawio-1.png>)
+- **Grad-CAM Akış Diyagramı**  :
+![alt text](<Grad-CAM Pipeline.drawio-1.png>)
+- **Dosya Bağımlılığı Diyagramı**  :
+![alt text](<file dependency diagram.drawio.png>)
+
+---
+## 📂 Proje Yapısı
 
 ```
 Alzheimer-CNN-Project/
@@ -63,86 +81,70 @@ Alzheimer-CNN-Project/
 
 ---
 
-## ⚙️ Setup Instructions
+## ⚙️ Kurulum Aşamaları
 
-### 1. Clone the Repository
+### 1. Depoyu Klonla
 
 ```bash
-git clone https://github.com/<username>/Alzheimer-CNN-Project.git
-cd Alzheimer-CNN-Project
+git clone https://github.com/searslan1/nn-alzheimer-classification.git
+cd nn-alzheimer-classification
 ```
 
-### 2. Install Dependencies
+### 2. Bağımlılıkları Kur
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Run Training
+### 3. Eğitimi Çalıştır
 
 ```bash
 python src/train.py
 ```
 
-### 4. Run Evaluation
+### 4. Değerlendirme Çalıştır
 
 ```bash
 python src/evaluate.py
 ```
 
-### 5. Run with Docker (optional)
+### 5. Docker ile Çalıştır (opsiyonel)
 
 ```bash
 docker build -t alzheimer-cnn .
 docker run -it -p 8888:8888 alzheimer-cnn
 ```
 
----
+## Sonuç ve Gelecek Çalışmalar
+Bu proje, derin öğrenme algoritmalarının, Alzheimer gibi karmaşık tıbbi verilerle çalışırken ne kadar güçlü bir araç olabileceğini kanıtlamıştır. Elde edilen yüksek doğruluk oranları, modelimizin doğru özellikleri öğrendiğini ve güvenilir bir temel oluşturduğunu göstermektedir.  
 
-## 📊 Results & Evaluation
+Ancak, projenin gerçek bir klinik karar destek sistemine dönüşmesi için en kritik gelecek adım:  
 
-* **Metrics:** Accuracy, Loss, Precision, Recall, F1-score.
-* **Visualizations:**
+### Klinik Dönüşüm
+- Şu anda modelimiz, **her bir MRI dilimi için** bir tahminde bulunmaktadır.  
+- Gelecekte, bir hastaya ait tüm MRI dilimlerinden gelen tahminlerin toplanmasıyla (örneğin çoğunluk oylaması yöntemi), modelin nihai çıktısı **bir dilimin sınıfı yerine hastanın genel Alzheimer evresi** olacaktır.  
+- Bu yöntem, çıktımızı doğrudan bir doktorun koyduğu tanıya eşdeğer hale getirecek ve klinik kullanım için gerekli **stabiliteyi** sağlayacaktır.  
 
-  * Accuracy & Loss curves (epoch-wise)
-  * Confusion matrix
-  * Classification report
-  * Grad-CAM heatmaps highlighting brain regions
+### Arayüz Geliştirme
+- Basit bir **web arayüzü** ile modelin dağıtımı (deployment) hedeflenmektedir.  
+- Bu arayüz sayesinde kullanıcılar MRI görüntülerini yükleyip anında bir teşhis alabilir.  
+- Böylece sistemin **sağlık sektöründeki pratik uygulamaları** önünün açılması planlanmaktadır.  
 
----
-
-## 🔎 CNN Pipeline Diagram
-![alt text](<Alzheimer classification diagram.drawio.png>)
-
----
-
-## 🔎 Grad-CAM Pipeline Diagram
-![alt text](<Grad-CAM Pipeline.drawio.png>)
+### Veri ve Teknoloji
+- Gelecekte farklı MRI veri setleri üzerinde çalışılarak modelin performansı artırılabilir.  
+- Daha yeni model mimarileri, örneğin **Vision Transformer (ViT)** test edilebilir.  
+- Arayüz için **Streamlit** veya **Gradio** kullanılarak modelin çıktısı gerçek zamanlı görselleştirilebilir.  
 
 ---
 
-## 🚀 Extensions & Bonus
+## Linkler
+Çalışmama ait tüm linklere aşağıdaki adreslerden ulaşabilirsiniz:  
 
-* **Transfer Learning:** Use pre-trained models (ResNet, EfficientNet).
-* **Hyperparameter Optimization:** Tune learning rate, batch size, dropout.
-* **Explainability:** Grad-CAM ensures model interpretability in medical context.
-![alt text](image.png)
----
+👉 [Kaggle Notebook](https://www.kaggle.com/code/efikaarslan/cnn-alzheimer-classification)  
 
-## 📎 Dataset Reference
+**Veri Seti:**  
+  [Kaggle Alzheimer MRI DataSet](https://www.kaggle.com/datasets/yasserhessein/dataset-alzheimer/data) — MRI görüntüleri içeren bu veri kümesi, Alzheimer hastalığının farklı evrelerini kapsıyor.
 
-* Kaggle: [Alzheimer MRI Dataset](https://www.kaggle.com/yasserhessein/dataset-alzheimer)
-* Paper: [Deep learning based prediction of Alzheimer’s disease from MRI](https://www.researchgate.net/publication/348486602_Deep_learning_based_prediction_of_Alzheimer's_disease_from_magnetic_resonance_images)
-
----
-
-## 👤 Author
-
-* **Your Name**
-  Akbank Bootcamp Project – CNN Deep Learning (Alzheimer MRI Classification)
-
----
-
-## 📜 License
-
-This project is licensed under the MIT License.
+- **İlgili Makale:**  
+  *Deep Learning Based Prediction of Alzheimer’s Disease From Magnetic Resonance Images* — Bu proje için ilham kaynağı olan çalışma. Daha fazla metodoloji detayları ve literatürdeki mevcut yaklaşımlar için okunması faydalı.  
+  Kaynak: https://www.researchgate.net/publication/348486602_Deep_learning_based_prediction_of_Alzheimer's_disease_from_magnetic_resonance_images
