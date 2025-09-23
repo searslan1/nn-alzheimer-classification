@@ -20,23 +20,23 @@ default_transform = transforms.Compose([
 ])
 
 # Class-specific augmentations
-class_transforms = {
-    "ModerateDemented": transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.RandomHorizontalFlip(p=0.7),
-        transforms.RandomRotation(20),
-        transforms.ColorJitter(brightness=0.3, contrast=0.3),
-        transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
-    ]),
-    "VeryMildDemented": transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.RandomHorizontalFlip(p=0.7),
-        transforms.RandomRotation(20),
-        transforms.ColorJitter(saturation=0.2, hue=0.1),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
-        transforms.RandomErasing(p=0.1),  # normalize sonrası daha sağlıklı
-    ])
-}
+# class_transforms = {
+#     "ModerateDemented": transforms.Compose([
+#         transforms.Resize((224, 224)),
+#         transforms.RandomHorizontalFlip(p=0.7),
+#         transforms.RandomRotation(20),
+#         transforms.ColorJitter(brightness=0.3, contrast=0.3),
+#         transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),
+#         transforms.ToTensor(),
+#         transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
+#     ]),
+#     "VeryMildDemented": transforms.Compose([
+#         transforms.Resize((224, 224)),
+#         transforms.RandomHorizontalFlip(p=0.7),
+#         transforms.RandomRotation(20),
+#         transforms.ColorJitter(saturation=0.2, hue=0.1),
+#         transforms.ToTensor(),
+#         transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
+#         transforms.RandomErasing(p=0.1),  # normalize sonrası daha sağlıklı
+#     ])
+# }
