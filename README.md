@@ -22,14 +22,12 @@ Yaptığımız çalışmalar sonucunda, modelimiz tüm sınıflar için neredeys
 ## Çıktılar
 
 #### Karmaşıklık Matrisi (Confusion Matrix)
-
-Modelin, zorlu **ModerateDemented** ve **VeryMildDemented** sınıflarını dahi mükemmele yakın bir doğrulukla ayırt edebildiği gözlemlenmiştir.  
+> Modelin, zorlu **ModerateDemented** ve **VeryMildDemented** sınıflarını dahi mükemmele yakın bir doğrulukla ayırt edebildiği gözlemlenmiştir.  
 ![alt text](confusion_matrix.png)
 ---
 
 #### Grad-CAM (Yorumlanabilirlik)
-
-Modelin karar verme sürecini görselleştiren **Grad-CAM ısı haritaları**, modelin beynin genel dokusuna ve Alzheimer ile ilişkilendirilen kritik bölgelere odaklandığını göstermektedir. Bu, modelin aldığı kararların **klinik olarak anlamlı** olduğunu doğrulamaktadır.  
+> Modelin karar verme sürecini görselleştiren **Grad-CAM ısı haritaları**, modelin beynin genel dokusuna ve Alzheimer ile ilişkilendirilen kritik bölgelere odaklandığını göstermektedir. Bu, modelin aldığı kararların **klinik olarak anlamlı** olduğunu doğrulamaktadır.  
 ![alt text](gradcam_example.png)
 ---
 #### Eğitim Eğrileri (Training & Validation Curves)
