@@ -7,7 +7,7 @@ from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
 from sklearn.model_selection import StratifiedShuffleSplit
 from torchvision import transforms
 
-from transforms import class_transforms
+#from transforms import class_transforms
 
 # -----------------------------
 # 0) Yardımcılar / sabitler
@@ -142,7 +142,7 @@ def build_dataloaders(
     pin_memory: bool = True,
     train_transform=None,
     val_transform=None,
-    class_transforms=class_transforms,   # 🔑 default artık import edilen dict
+    class_transforms=None,   # 🔑 default artık import edilen dict
     train_dir: str = "train",
     val_dir: str = "val",
     test_dir: str = "test",
