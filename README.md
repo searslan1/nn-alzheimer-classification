@@ -23,7 +23,7 @@ Yaptığımız çalışmalar sonucunda, modelimiz tüm sınıflar için neredeys
 
 #### Karmaşıklık Matrisi (Confusion Matrix)
 > Modelin, zorlu **ModerateDemented** ve **VeryMildDemented** sınıflarını dahi mükemmele yakın bir doğrulukla ayırt edebildiği gözlemlenmiştir.  
-![alt text](iamges/confusion_matrix.png)
+![alt text](images/confusion_matrix.png)
 ---
 
 #### Grad-CAM (Yorumlanabilirlik)
