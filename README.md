@@ -115,6 +115,11 @@ python src/evaluate.py
 docker build -t alzheimer-cnn .
 docker run -it -p 8888:8888 alzheimer-cnn
 ```
+## Yolculuğumuz: Bilimsel Yöntem
+
+Bu proje, bir yapay zeka projesinin doğrusal bir süreçten çok, süreçte yaşanan hatalar ve bu hatalardan öğrenilenlerle ilerlenen döngüsel bir yolculuk olduğunu göstermektedir. Modelin **VeryMildDemented** sınıfını tanımakta zorlandığını fark ettikten sonra, her bir denemede yeni bir hipotez kurarak ve bu hipotezleri test ederek projenin nihai başarısına ulaştık.
+
+![alt text](images/image.png)
 
 ## Sonuç ve Gelecek Çalışmalar
 Bu proje, derin öğrenme algoritmalarının, Alzheimer gibi karmaşık tıbbi verilerle çalışırken ne kadar güçlü bir araç olabileceğini kanıtlamıştır. Elde edilen yüksek doğruluk oranları, modelimizin doğru özellikleri öğrendiğini ve güvenilir bir temel oluşturduğunu göstermektedir.  
