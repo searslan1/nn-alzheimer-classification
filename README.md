@@ -50,13 +50,13 @@ Yaptığımız çalışmalar sonucunda, modelimiz tüm sınıflar için neredeys
 Bu proje, veri hazırlığı ve modelin **aşırı öğrenmesini engellemek** gibi en kritik adımları başarıyla tamamlamıştır. Proje kapsamında kullanılan ana bileşenlerin görselleştirilmesi aşağıda yer almaktadır.
 
 - **Proje Mimarisi**  :
-![alt text](<High-Level Architecture.drawio.png>)
+![alt text](<images/High-Level Architecture.drawio.png>)
 - **CNN Akış Diyagramı**  :
-![alt text](<Alzheimer classification diagram.drawio-1.png>)
+![alt text](<images/Alzheimer classification diagram.drawio-1.png>)
 - **Grad-CAM Akış Diyagramı**  :
-![alt text](<Grad-CAM Pipeline.drawio-1.png>)
+![alt text](<images/Grad-CAM Pipeline.drawio-1.png>)
 - **Dosya Bağımlılığı Diyagramı**  :
-![alt text](<file dependency diagram.drawio.png>)
+![alt text](<images/file dependency diagram.drawio.png>)
 
 ---
 ## 📂 Proje Yapısı
