@@ -64,7 +64,7 @@ def predict_and_grad_cam(image, model, transform, class_names):
         model, 
         grad_cam_input_img.to(torch.device('cpu')), 
         conv_layer=target_layer, 
-        pred_idx=predicted_idx, 
+        target_class=predicted_idx,
         device=torch.device('cpu')
     )
     
