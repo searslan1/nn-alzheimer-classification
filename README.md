@@ -27,7 +27,10 @@ Yaptığımız çalışmalar sonucunda, modelimiz tüm sınıflar için neredeys
 ---
 
 #### Grad-CAM (Yorumlanabilirlik)
-> Modelin karar verme sürecini görselleştiren **Grad-CAM ısı haritaları**, modelin beynin genel dokusuna ve Alzheimer ile ilişkilendirilen kritik bölgelere odaklandığını göstermektedir. Bu, modelin aldığı kararların **klinik olarak anlamlı** olduğunu doğrulamaktadır.  
+> Modelin karar verme sürecini görselleştiren Grad-CAM ısı haritaları, Alzheimer ile ilişkilendirilen kritik beyin bölgelerine odaklandığını göstermektedir.  
+
+Artık bu görselleştirme, **Streamlit UI** üzerinden dinamik olarak da elde edilebilmektedir.
+
 ![alt text](images/gradcam_example.png)
 ---
 #### Eğitim Eğrileri (Training & Validation Curves)
@@ -45,6 +48,17 @@ Yaptığımız çalışmalar sonucunda, modelimiz tüm sınıflar için neredeys
 | **Accuracy**        |           |        | **0.97** | 1026    |
 | **Macro Avg**       | 0.98      | 0.98   | 0.98     | 1026    |
 | **Weighted Avg**    | 0.97      | 0.97   | 0.97     | 1026    |
+
+#### Streamlit Arayüzü ile Görselleştirme
+> Proje sonunda, **Streamlit tabanlı bir arayüz** geliştirildi.  
+> Kullanıcılar artık MRI görüntülerini yükleyip:
+> - Modelin tahmin ettiği Alzheimer evresini görebilir  
+> - **Grad-CAM ısı haritası** ile modelin hangi beyin bölgelerine odaklandığını inceleyebilir  
+> - Ayrıca, **Gemini/ChatGPT tabanlı açıklama** sayesinde modelin kararını klinik açıdan yorumlayan ek bir not alabilirler.  
+
+![alt text](images/streamlit_ui_example.png)
+
+Bu sayede proje sadece bir araştırma deneyi olmaktan çıkıp, **kullanıcı dostu bir klinik karar destek prototipine** dönüşmüştür.
 
 ## Ekler
 Bu proje, veri hazırlığı ve modelin **aşırı öğrenmesini engellemek** gibi en kritik adımları başarıyla tamamlamıştır. Proje kapsamında kullanılan ana bileşenlerin görselleştirilmesi aşağıda yer almaktadır.
@@ -131,15 +145,10 @@ Ancak, projenin gerçek bir klinik karar destek sistemine dönüşmesi için en 
 - Gelecekte, bir hastaya ait tüm MRI dilimlerinden gelen tahminlerin toplanmasıyla (örneğin çoğunluk oylaması yöntemi), modelin nihai çıktısı **bir dilimin sınıfı yerine hastanın genel Alzheimer evresi** olacaktır.  
 - Bu yöntem, çıktımızı doğrudan bir doktorun koyduğu tanıya eşdeğer hale getirecek ve klinik kullanım için gerekli **stabiliteyi** sağlayacaktır.  
 
-### Arayüz Geliştirme
-- Basit bir **web arayüzü** ile modelin dağıtımı (deployment) hedeflenmektedir.  
-- Bu arayüz sayesinde kullanıcılar MRI görüntülerini yükleyip anında bir teşhis alabilir.  
-- Böylece sistemin **sağlık sektöründeki pratik uygulamaları** önünün açılması planlanmaktadır.  
-
 ### Veri ve Teknoloji
 - Gelecekte farklı MRI veri setleri üzerinde çalışılarak modelin performansı artırılabilir.  
 - Daha yeni model mimarileri, örneğin **Vision Transformer (ViT)** test edilebilir.  
-- Arayüz için **Streamlit** veya **Gradio** kullanılarak modelin çıktısı gerçek zamanlı görselleştirilebilir.  
+
 
 ---
 
