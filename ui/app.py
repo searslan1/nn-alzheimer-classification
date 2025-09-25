@@ -11,7 +11,7 @@ import sys
 # Proje kök dizinini Python yoluna ekle
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.utils import get_peak_activation_region, explain_prediction_with_chatgpt
+from src.utils import get_peak_activation_region, explain_prediction_with_ai
 from src.model import get_model
 from src.transforms import IMAGENET_MEAN, IMAGENET_STD
 from src.visualization import generate_gradcam
@@ -138,9 +138,9 @@ if image_to_process is not None:
             st.image(overlay, caption="Grad-CAM Overlay", use_column_width=True)
             st.info("Kırmızı bölgeler modelin karar verirken en çok dikkat ettiği yerleri gösterir.")
             peak_region = get_peak_activation_region(heatmap)
-        with st.spinner("ChatGPT yorumu hazırlanıyor..."):
-            explanation = explain_prediction_with_chatgpt(predicted_class, confidence, peak_region, CLASS_NAMES)
-            st.subheader("🧾 ChatGPT Yorumu")
+        with st.spinner("AI yorumu hazırlanıyor..."):
+            explanation = explain_prediction_with_ai(predicted_class, confidence, peak_region, CLASS_NAMES)
+            st.subheader("🧾 AI Yorumu")
             st.write(explanation)
     else:
             st.info("Lütfen bir MRI görüntüsü yükleyin veya yukarıdan bir örnek seçin.")
