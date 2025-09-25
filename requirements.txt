@@ -8,3 +8,4 @@ opencv-python>=4.7.0
 tensorboard>=2.13.0
 openai>=1.0.0
 python-dotenv
+google-generativeai

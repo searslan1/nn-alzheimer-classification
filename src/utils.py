@@ -32,26 +32,12 @@ def explain_prediction_with_ai(predicted_class, confidence, peak_region, class_n
     (ör. hipokampus, korteks, temporal lob) yorumla. Açıklaman tıbbi bir içgörü gibi olsun, ama kullanıcı dostu kal.
     """
 
-    # --- Öncelik OpenAI ---
-    if OPENAI_KEY:
-        from openai import OpenAI
-        client = OpenAI(api_key=OPENAI_KEY)
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",  # Daha ekonomik
-            messages=[
-                {"role": "system", "content": "Sen bir nöroloji uzmanı gibi açıklama yap."},
-                {"role": "user", "content": prompt}
-            ]
-        )
-        return response.choices[0].message.content
-
-    # --- Fallback: Gemini ---
-    elif GEMINI_KEY:
-        import google.generativeai as genai
-        genai.configure(api_key=GEMINI_KEY)
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content(prompt)
-        return response.text
-
-    else:
-        raise ValueError("Ne OPENAI_API_KEY ne de GEMINI_API_KEY bulundu! Kaggle Secrets veya .env üzerinden tanımlayın.")
+    # --- Direkt Gemini kullan ---
+    import google.generativeai as genai
+    if not GEMINI_KEY:
+        raise ValueError("GEMINI_API_KEY bulunamadı! Kaggle Secrets veya .env üzerinden tanımlayın.")
+    
+    genai.configure(api_key=GEMINI_KEY)
+    model = genai.GenerativeModel("gemini-1.5-flash")
+    response = model.generate_content(prompt)
+    return response.text
