@@ -60,7 +60,7 @@ def predict_and_grad_cam(image, model, transform, class_names):
         transforms.ToTensor(),
     ])(image).unsqueeze(0)
     
-    heatmap = generate_gradcam(
+    heatmap, _ = generate_gradcam(
         model, 
         grad_cam_input_img.to(torch.device('cpu')), 
         conv_layer=target_layer, 
