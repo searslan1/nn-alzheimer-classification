@@ -33,7 +33,7 @@ def explain_prediction_with_chatgpt(predicted_class, confidence, peak_region, cl
     """
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="pt-3.5-turbo",
         messages=[
             {"role": "system", "content": "Sen bir nöroloji uzmanı gibi açıklama yap."},
             {"role": "user", "content": prompt}
