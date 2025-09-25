@@ -1,26 +1,23 @@
 import numpy as np
-import os
 from openai import OpenAI
+try:
+    from kaggle_secrets import UserSecretsClient
+    user_secrets = UserSecretsClient()
+    API_KEY = user_secrets.get_secret("OPENAI_API_KEY")
+except:
+    import os
+    API_KEY = os.environ.get("OPENAI_API_KEY")
 
 def get_peak_activation_region(heatmap):
-    """
-    Grad-CAM ısı haritasındaki en yüksek aktivasyon noktasını bulur.
-    heatmap: H×W numpy array
-    """
     max_val = heatmap.max()
     y, x = np.unravel_index(np.argmax(heatmap), heatmap.shape)
     return {"x": int(x), "y": int(y), "value": float(max_val)}
 
 def explain_prediction_with_chatgpt(predicted_class, confidence, peak_region, class_names):
-    """
-    Modelin tahminini ve Grad-CAM bilgilerini OpenAI ChatGPT API üzerinden yorumlatır.
-    Kaggle Secrets içinde saklanan OPENAI_API_KEY kullanılır.
-    """
-    api_key = os.environ.get("OPENAI_API_KEY")
-    if not api_key:
-        raise ValueError("OPENAI_API_KEY bulunamadı! Kaggle Secrets bölümüne eklediğinizden emin olun.")
+    if not API_KEY:
+        raise ValueError("OPENAI_API_KEY bulunamadı! Kaggle Secrets veya .env üzerinden tanımlayın.")
 
-    client = OpenAI(api_key=api_key)
+    client = OpenAI(api_key=API_KEY)
 
     notes = f"Grad-CAM en yüksek aktivasyon noktası (x={peak_region['x']}, y={peak_region['y']}), yoğunluk={peak_region['value']:.2f}."
 
@@ -42,5 +39,4 @@ def explain_prediction_with_chatgpt(predicted_class, confidence, peak_region, cl
             {"role": "user", "content": prompt}
         ]
     )
-
     return response.choices[0].message.content
