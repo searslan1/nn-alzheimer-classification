@@ -6,11 +6,12 @@ import numpy as np
 import os
 import random
 import sys
-from src.utils import get_peak_activation_region, explain_prediction_with_chatgpt
+
 
 # Proje kök dizinini Python yoluna ekle
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from src.utils import get_peak_activation_region, explain_prediction_with_chatgpt
 from src.model import get_model
 from src.transforms import IMAGENET_MEAN, IMAGENET_STD
 from src.visualization import generate_gradcam
@@ -71,13 +72,7 @@ def predict_and_grad_cam(image, model, transform, class_names):
     
     return predicted_class, confidence, heatmap, grad_cam_input_img.squeeze()
 
-peak_region = get_peak_activation_region(heatmap)
 
-with st.spinner("ChatGPT yorumu hazırlanıyor..."):
-    explanation = explain_prediction_with_chatgpt(predicted_class, confidence, peak_region, CLASS_NAMES)
-
-st.subheader("🧾 ChatGPT Yorumu")
-st.write(explanation)
 
 # --- 4. Streamlit UI ---
 st.set_page_config(layout="wide", page_title="Alzheimer Sınıflandırma Sistemi")
