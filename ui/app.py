@@ -113,20 +113,26 @@ elif selected_sample_image is not None:
 if image_to_process is not None:
     if st.button("Sınıflandır"):
         with st.spinner("Görüntü sınıflandırılıyor ve Grad-CAM oluşturuluyor..."):
-            predicted_class, confidence, heatmap, original_tensor = predict_and_grad_cam(image_to_process, MODEL, inference_transform, CLASS_NAMES)
+            predicted_class, confidence, heatmap, original_tensor = predict_and_grad_cam(
+                image_to_process, MODEL, inference_transform, CLASS_NAMES
+            )
             
             st.success("Sınıflandırma Tamamlandı!")
             st.write(f"**Tahmin Edilen Sınıf:** **{predicted_class}**")
             st.write(f"**Güven Seviyesi:** **%{(confidence * 100):.2f}**")
             
             st.subheader("Modelin Odaklandığı Alanlar (Grad-CAM)")
-            import matplotlib.pyplot as plt
-            fig, ax = plt.subplots(figsize=(6, 6))
-            ax.imshow(original_tensor.permute(1, 2, 0))
-            ax.imshow(heatmap, cmap='jet', alpha=0.5)
-            ax.axis('off')
-            st.pyplot(fig)
-            st.info("Kırmızı bölgeler modelin karar verirken en çok dikkat ettiği yerleri gösterir.")
-else:
-    st.info("Lütfen bir MRI görüntüsü yükleyin veya yukarıdan bir örnek seçin.")
 
+            # 🔥 Eğitimdeki gibi overlay yap
+            import cv2
+            import numpy as np
+
+            img = np.array(image_to_process.convert("RGB"))
+            heatmap_resized = cv2.resize(heatmap, (img.shape[1], img.shape[0]))
+            heatmap_colored = cv2.applyColorMap(np.uint8(255 * heatmap_resized), cv2.COLORMAP_JET)
+            overlay = cv2.addWeighted(img, 0.5, heatmap_colored, 0.5, 0)
+
+            st.image(overlay, caption="Grad-CAM Overlay", use_column_width=True)
+            st.info("Kırmızı bölgeler modelin karar verirken en çok dikkat ettiği yerleri gösterir.")
+    else:
+            st.info("Lütfen bir MRI görüntüsü yükleyin veya yukarıdan bir örnek seçin.")
