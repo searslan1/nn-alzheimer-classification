@@ -5,14 +5,15 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-
-from dataset import build_dataloaders
-from evaluate import evaluate_model, save_confusion_matrix, save_classification_report
-from visualization import plot_training, generate_gradcam, plot_gradcam_on_image
-from transforms import base_train_transform, default_transform
 from torchvision import transforms
-from model import get_model
-from losses import FocalLoss   # 🔑 eklendi
+
+from src.dataset import build_dataloaders
+from src.evaluate import evaluate_model, save_confusion_matrix, save_classification_report
+from src.visualization import plot_training, generate_gradcam, plot_gradcam_on_image
+from src.transforms import base_train_transform, default_transform
+from src.model import get_model
+from src.losses import FocalLoss
+
 
 
 def train_model(
